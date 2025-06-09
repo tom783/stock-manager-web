@@ -26,8 +26,13 @@ export default function RootLayout({
   return (
     <html lang='ko'>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Gnb />
-        {children}
+        <div className='h-screen grid grid-rows-[auto_1fr_auto]'>
+          <Gnb />
+          <main className='p-8'>{children}</main>
+          <footer className='text-center text-gray-500 dark:text-gray-400 text-sm py-4'>
+            © {new Date().getFullYear()} Stock Manager. All rights reserved.
+          </footer>
+        </div>
       </body>
     </html>
   );
