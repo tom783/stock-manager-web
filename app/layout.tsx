@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Gnb from '@/components/layout/Gnb';
+import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,6 +34,7 @@ export default function RootLayout({
             © {new Date().getFullYear()} Stock Manager. All rights reserved.
           </footer>
         </div>
+        <Toaster />
       </body>
     </html>
   );
