@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     console.log('Processing Excel files...');
-    const xlsxData = await readExcelFiles(files, sheetName || '시트1');
+    const xlsxData = await readExcelFiles(files, sheetName || 'Sheet1');
 
     if (!xlsxData || xlsxData.length === 0) {
       return NextResponse.json({ error: 'No data found in Excel files' }, { status: 400 });
