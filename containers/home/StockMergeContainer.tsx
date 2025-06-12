@@ -26,8 +26,10 @@ import api from '@/lib/axios';
 
 const formSchema = z.object({
   sheetName: z.string().min(1, 'Sheet name is required'),
-  standardColums: z.array(z.string()).min(1, 'Please select at least one column'),
-  standardColum: z.string(),
+  standardColumns: z.array(z.string()).min(1, 'Please select at least one column'),
+  standardColumn: z.string(),
+  stockColumns: z.array(z.string()).min(1, 'Please select at least one stock column'),
+  stockColumn: z.string(),
   files: z
     .array(z.custom<File>())
     .min(1, 'Please select at least one file')
@@ -45,8 +47,10 @@ export default function StockMergeContainer() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       sheetName: 'Sheet1',
-      standardColums: ['D', 'E', 'F', 'G', 'H', 'I'],
-      standardColum: '',
+      standardColumns: ['D', 'E', 'F', 'G', 'H', 'I'],
+      standardColumn: '',
+      stockColumns: ['J', 'K'],
+      stockColumn: '',
       files: [],
     },
   });
@@ -88,6 +92,9 @@ export default function StockMergeContainer() {
     });
   }, []);
 
+  /**
+   * 데이터 취합 및 다운로드 핸들러
+   */
   const onSubmit = useCallback(async (data: FormValues) => {
     console.log('Form submitted with data:', data);
     toast.success('Form submitted successfully!');
@@ -98,7 +105,8 @@ export default function StockMergeContainer() {
       formData.append(`file_${index}`, file);
     });
     formData.append('sheetName', data.sheetName);
-    formData.append('standardColums', JSON.stringify(data.standardColums));
+    formData.append('standardColumns', JSON.stringify(data.standardColumns));
+    formData.append('stockColumns', JSON.stringify(data.stockColumns));
 
     const response = await api.post('/stock-merge', formData, {
       headers: {
@@ -147,11 +155,11 @@ export default function StockMergeContainer() {
   }, []);
 
   const onAddColumn = useCallback(() => {
-    const currentCols = form.getValues('standardColums');
-    const newCol = form.getValues('standardColum').trim();
+    const currentCols = form.getValues('standardColumns');
+    const newCol = form.getValues('standardColumn').trim();
     if (newCol && !currentCols.includes(newCol)) {
-      form.setValue('standardColums', [...currentCols, newCol]);
-      form.setValue('standardColum', ''); // Clear the input after adding
+      form.setValue('standardColumns', [...currentCols, newCol]);
+      form.setValue('standardColumn', ''); // Clear the input after adding
     } else {
       toast.error('Please enter a valid column name that is not already added.');
     }
@@ -235,14 +243,14 @@ export default function StockMergeContainer() {
             />
             <FormField
               control={form.control}
-              name='standardColum'
+              name='standardColumn'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>기준 컬럼명 (선택)</FormLabel>
                   <FormControl>
                     <div className='flex items-center gap-2'>
                       <Input
-                        placeholder='standard colum'
+                        placeholder='standard column'
                         {...field}
                         value={field.value?.toUpperCase() || ''}
                         onChange={(e) => field.onChange(e.target.value.toUpperCase())}
@@ -254,9 +262,9 @@ export default function StockMergeContainer() {
                   </FormControl>
                   <FormDescription>데이터 취합 기준이 되는 컬럼을 설정할 수 있습니다.</FormDescription>
                   <FormMessage />
-                  {form.watch('standardColums').length > 0 && (
+                  {form.watch('standardColumns').length > 0 && (
                     <ul className='mt-2 space-y-1'>
-                      {form.watch('standardColums').map((col, index) => (
+                      {form.watch('standardColumns').map((col, index) => (
                         <li
                           key={index}
                           className='flex items-center justify-between gap-2 border border-border rounded-sm p-3'
@@ -267,9 +275,59 @@ export default function StockMergeContainer() {
                             variant='ghost'
                             size='icon'
                             onClick={() => {
-                              const currentCols = form.getValues('standardColums');
+                              const currentCols = form.getValues('standardColumns');
                               form.setValue(
-                                'standardColums',
+                                'standardColumns',
+                                currentCols.filter((c) => c !== col),
+                              );
+                            }}
+                          >
+                            <X className='size-4' />
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='stockColumn'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>재고 컬럼명 (선택)</FormLabel>
+                  <FormControl>
+                    <div className='flex items-center gap-2'>
+                      <Input
+                        placeholder='stock column'
+                        {...field}
+                        value={field.value?.toUpperCase() || ''}
+                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                      />
+                      <Button variant='outline' size='sm' type='button' onClick={onAddColumn}>
+                        + 컬럼 추가
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormDescription>재고 컬럼을 설정할 수 있습니다.</FormDescription>
+                  <FormMessage />
+                  {form.watch('stockColumns').length > 0 && (
+                    <ul className='mt-2 space-y-1'>
+                      {form.watch('stockColumns').map((col, index) => (
+                        <li
+                          key={index}
+                          className='flex items-center justify-between gap-2 border border-border rounded-sm p-3'
+                        >
+                          <span>{col}</span>
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            size='icon'
+                            onClick={() => {
+                              const currentCols = form.getValues('stockColumns');
+                              form.setValue(
+                                'stockColumns',
                                 currentCols.filter((c) => c !== col),
                               );
                             }}

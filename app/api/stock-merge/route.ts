@@ -5,24 +5,14 @@ import * as XLSX from 'xlsx';
 export async function POST(request: Request) {
   console.log('Received request:', request);
 
-  const valueKeyCell = [
-    {
-      name: '재고',
-      cell: 'J',
-    },
-    {
-      name: '가용재고',
-      cell: 'K',
-    },
-  ];
-
   try {
     const formData = await request.formData();
     console.log('Parsed body:', formData);
     const fileEntries = Array.from(formData.entries()).filter(([key]) => key.startsWith('file_'));
 
     const files = await createFileInfo(fileEntries);
-    const standardColum = JSON.parse(formData.get('standardColums') as string);
+    const standardColumns = JSON.parse(formData.get('standardColumns') as string);
+    const stockColumns = JSON.parse(formData.get('stockColumns') as string);
     const sheetName = formData.get('sheetName') as string;
 
     // 필수 필드 검증
@@ -36,11 +26,7 @@ export async function POST(request: Request) {
     if (!xlsxData || xlsxData.length === 0) {
       return NextResponse.json({ error: 'No data found in Excel files' }, { status: 400 });
     }
-    const mergeXlsxData = mergeDataByIdWithReduce(
-      xlsxData,
-      standardColum || [],
-      valueKeyCell.map((item) => item.cell),
-    );
+    const mergeXlsxData = mergeDataByIdWithReduce(xlsxData, standardColumns || [], stockColumns || []);
 
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(mergeXlsxData);
